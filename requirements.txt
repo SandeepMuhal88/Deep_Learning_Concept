@@ -1,0 +1,12 @@
+# This file lists the Python libraries required for your project.
+# You can install these libraries using pip:
+# pip install -r requirements.txt
+
+numpy
+nltk
+seaborn
+matplotlib
+scikit-learn  # The package name for sklearn
+scipy
+gensim
+pandas
