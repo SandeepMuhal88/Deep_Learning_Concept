@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .tab.active {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .content {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .neural-network {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            min-height: 300px;
+        }
+        
+        .layer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .layer h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .neuron {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .neuron:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        }
+        
+        .neuron.active {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #48cae4, #023047);
+            transform-origin: left;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .connection.active {
+            opacity: 1;
+            height: 4px;
+            box-shadow: 0 0 10px #48cae4;
+        }
+        
+        .explanation {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border-left: 4px solid #feca57;
+        }
+        
+        .math-section {
+            background: rgba(0,0,0,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .formula {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .interactive-demo {
+            background: rgba(255,255,255,0.05);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            align-items: center;
+        }
+        
+        input[type="number"] {
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 16px;
+            width: 80px;
+        }
+        
+        input[type="number"]::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .step-by-step {
+            margin: 20px 0;
+        }
+        
+        .step {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #48cae4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Neural Network Explorer</h1>
+            <p>Discover how artificial neurons learn and make decisions</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('basics')">What is a Neural Network?</div>
+            <div class="tab" onclick="showTab('structure')">Network Structure</div>
+            <div class="tab" onclick="showTab('math')">The Math Behind</div>
+            <div class="tab" onclick="showTab('demo')">Interactive Demo</div>
+        </div>
+        
+        <div class="content">
+            <div id="basics" class="tab-content">
+                <h2>🎯 What is a Neural Network?</h2>
+                <div class="explanation">
+                    <p>Think of a neural network as a digital brain made of simple processing units called <strong>neurons</strong> or <strong>nodes</strong>. Just like your brain learns to recognize faces, sounds, or patterns, neural networks learn to recognize patterns in data.</p>
+                </div>
+                
+                <h3>🔍 Key Concepts:</h3>
+                <div class="step">
+                    <strong>Neurons:</strong> Simple processing units that receive inputs, process them, and produce outputs
+                </div>
+                <div class="step">
+                    <strong>Weights:</strong> Numbers that determine how important each input is (like volume controls)
+                </div>
+                <div class="step">
+                    <strong>Layers:</strong> Groups of neurons working together - input layer receives data, hidden layers process it, output layer gives results
+                </div>
+                <div class="step">
+                    <strong>Learning:</strong> The network adjusts its weights based on examples to get better at predictions
+                </div>
+                
+                <div class="explanation">
+                    <h4>🌟 Real-World Example:</h4>
+                    <p>Imagine you're teaching a child to recognize cats in photos. You show them thousands of cat pictures, and gradually they learn that pointy ears + whiskers + certain eye shapes = cat. Neural networks learn the same way, but with numbers instead of visual features!</p>
+                </div>
+            </div>
+            
+            <div id="structure" class="tab-content hidden">
+                <h2>🏗️ Network Architecture</h2>
+                
+                <div class="neural-network">
+                    <div class="layer">
+                        <h3>Input Layer</h3>
+                        <div class="neuron" onclick="activateNeuron(this)">X₁</div>
+                        <div class="neuron" onclick="activateNeuron(this)">X₂</div>
+                        <div class="neuron" onclick="activateNeuron(this)">X₃</div>
+                    </div>
+                    
+                    <div class="layer">
+                        <h3>Hidden Layer</h3>
+                        <div class="neuron" onclick="activateNeuron(this)">H₁</div>
+                        <div class="neuron" onclick="activateNeuron(this)">H₂</div>
+                        <div class="neuron" onclick="activateNeuron(this)">H₃</div>
+                        <div class="neuron" onclick="activateNeuron(this)">H₄</div>
+                    </div>
+                    
+                    <div class="layer">
+                        <h3>Output Layer</h3>
+                        <div class="neuron" onclick="activateNeuron(this)">Y₁</div>
+                        <div class="neuron" onclick="activateNeuron(this)">Y₂</div>
+                    </div>
+                </div>
+                
+                <button onclick="animateNetwork()">🚀 Watch Data Flow Through Network</button>
+                
+                <div class="step-by-step">
+                    <h3>📊 How Information Flows:</h3>
+                    <div class="step">
+                        <strong>Step 1:</strong> Input layer receives raw data (like pixel values of an image)
+                    </div>
+                    <div class="step">
+                        <strong>Step 2:</strong> Each connection has a weight that multiplies the input value
+                    </div>
+                    <div class="step">
+                        <strong>Step 3:</strong> Hidden neurons sum up weighted inputs and apply an activation function
+                    </div>
+                    <div class="step">
+                        <strong>Step 4:</strong> Process repeats through all layers until reaching the output
+                    </div>
+                    <div class="step">
+                        <strong>Step 5:</strong> Output layer produces final predictions or classifications
+                    </div>
+                </div>
+            </div>
+            
+            <div id="math" class="tab-content hidden">
+                <h2>🔢 The Mathematics</h2>
+                
+                <div class="math-section">
+                    <h3>⚡ Neuron Activation</h3>
+                    <p>Each neuron performs a simple calculation:</p>
+                    <div class="formula">
+                        output = activation_function(Σ(input × weight) + bias)
+                    </div>
+                    <p>Where Σ means "sum of all"</p>
+                </div>
+                
+                <div class="math-section">
+                    <h3>🎯 Activation Functions</h3>
+                    <div class="step">
+                        <strong>ReLU (most common):</strong> f(x) = max(0, x) - Only passes positive values
+                    </div>
+                    <div class="step">
+                        <strong>Sigmoid:</strong> f(x) = 1/(1 + e^(-x)) - Squashes values between 0 and 1
+                    </div>
+                    <div class="step">
+                        <strong>Tanh:</strong> f(x) = (e^x - e^(-x))/(e^x + e^(-x)) - Squashes between -1 and 1
+                    </div>
+                </div>
+                
+                <div class="math-section">
+                    <h3>📚 Learning Process</h3>
+                    <div class="step">
+                        <strong>Forward Pass:</strong> Data flows from input to output, making predictions
+                    </div>
+                    <div class="step">
+                        <strong>Calculate Loss:</strong> Compare predictions with actual answers
+                    </div>
+                    <div class="step">
+                        <strong>Backpropagation:</strong> Calculate how much each weight contributed to the error
+                    </div>
+                    <div class="step">
+                        <strong>Update Weights:</strong> Adjust weights to reduce error using gradient descent
+                    </div>
+                </div>
+            </div>
+            
+            <div id="demo" class="tab-content hidden">
+                <h2>🎮 Interactive Demo</h2>
+                <p>Let's build a simple neuron that decides if someone likes pizza based on their preferences!</p>
+                
+                <div class="interactive-demo">
+                    <h3>🍕 Pizza Preference Predictor</h3>
+                    <p>Rate each factor from 0-10:</p>
+                    
+                    <div class="input-section">
+                        <label>Loves cheese: </label>
+                        <input type="number" id="cheese" min="0" max="10" value="7">
+                        <span>× Weight: 0.3</span>
+                    </div>
+                    
+                    <div class="input-section">
+                        <label>Enjoys bread: </label>
+                        <input type="number" id="bread" min="0" max="10" value="8">
+                        <span>× Weight: 0.2</span>
+                    </div>
+                    
+                    <div class="input-section">
+                        <label>Likes tomato: </label>
+                        <input type="number" id="tomato" min="0" max="10" value="6">
+                        <span>× Weight: 0.1</span>
+                    </div>
+                    
+                    <div class="input-section">
+                        <label>Hungry level: </label>
+                        <input type="number" id="hungry" min="0" max="10" value="9">
+                        <span>× Weight: 0.4</span>
+                    </div>
+                    
+                    <button onclick="calculatePizzaLove()">🧮 Calculate Pizza Love!</button>
+                    
+                    <div id="calculation-steps" class="step-by-step hidden">
+                        <h4>📝 Step-by-step calculation:</h4>
+                        <div id="step1" class="step"></div>
+                        <div id="step2" class="step"></div>
+                        <div id="step3" class="step"></div>
+                        <div id="step4" class="step"></div>
+                    </div>
+                    
+                    <div id="pizza-result" class="result hidden"></div>
+                </div>
+                
+                <div class="explanation">
+                    <h4>🎓 What Just Happened?</h4>
+                    <p>You just ran a simple neural network! The neuron took your inputs, multiplied each by its weight (importance), added them up, and used an activation function to make a decision. In real neural networks, this happens millions of times across thousands of neurons!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        function activateNeuron(neuron) {
+            neuron.classList.add('active');
+            setTimeout(() => {
+                neuron.classList.remove('active');
+            }, 1000);
+        }
+        
+        function animateNetwork() {
+            const neurons = document.querySelectorAll('.neuron');
+            
+            // Animate input layer first
+            setTimeout(() => {
+                neurons[0].classList.add('active');
+                neurons[1].classList.add('active');
+                neurons[2].classList.add('active');
+            }, 500);
+            
+            // Then hidden layer
+            setTimeout(() => {
+                neurons[0].classList.remove('active');
+                neurons[1].classList.remove('active');
+                neurons[2].classList.remove('active');
+                neurons[3].classList.add('active');
+                neurons[4].classList.add('active');
+                neurons[5].classList.add('active');
+                neurons[6].classList.add('active');
+            }, 1500);
+            
+            // Finally output layer
+            setTimeout(() => {
+                neurons[3].classList.remove('active');
+                neurons[4].classList.remove('active');
+                neurons[5].classList.remove('active');
+                neurons[6].classList.remove('active');
+                neurons[7].classList.add('active');
+                neurons[8].classList.add('active');
+            }, 2500);
+            
+            // Clear all
+            setTimeout(() => {
+                neurons[7].classList.remove('active');
+                neurons[8].classList.remove('active');
+            }, 3500);
+        }
+        
+        function calculatePizzaLove() {
+            const cheese = parseFloat(document.getElementById('cheese').value) || 0;
+            const bread = parseFloat(document.getElementById('bread').value) || 0;
+            const tomato = parseFloat(document.getElementById('tomato').value) || 0;
+            const hungry = parseFloat(document.getElementById('hungry').value) || 0;
+            
+            const weights = {cheese: 0.3, bread: 0.2, tomato: 0.1, hungry: 0.4};
+            const bias = -2; // This makes it harder to love pizza (more realistic!)
+            
+            // Calculate weighted sum
+            const weightedSum = (cheese * weights.cheese) + 
+                              (bread * weights.bread) + 
+                              (tomato * weights.tomato) + 
+                              (hungry * weights.hungry) + bias;
+            
+            // Apply sigmoid activation function
+            const sigmoid = 1 / (1 + Math.exp(-weightedSum));
+            const percentage = Math.round(sigmoid * 100);
+            
+            // Show step-by-step calculation
+            document.getElementById('step1').innerHTML = 
+                `<strong>Step 1 - Weighted Sum:</strong><br>
+                (${cheese} × 0.3) + (${bread} × 0.2) + (${tomato} × 0.1) + (${hungry} × 0.4) + (-2) = ${weightedSum.toFixed(2)}`;
+            
+            document.getElementById('step2').innerHTML = 
+                `<strong>Step 2 - Apply Sigmoid:</strong><br>
+                f(x) = 1 / (1 + e^(-${weightedSum.toFixed(2)})) = ${sigmoid.toFixed(4)}`;
+            
+            document.getElementById('step3').innerHTML = 
+                `<strong>Step 3 - Convert to Percentage:</strong><br>
+                ${sigmoid.toFixed(4)} × 100 = ${percentage}%`;
+            
+            document.getElementById('step4').innerHTML = 
+                `<strong>Step 4 - Interpretation:</strong><br>
+                ${percentage > 50 ? '🍕 This person loves pizza!' : '😐 This person is neutral about pizza.'}`;
+            
+            // Show result
+            const resultDiv = document.getElementById('pizza-result');
+            resultDiv.innerHTML = `
+                <h3>🎯 Pizza Love Score: ${percentage}%</h3>
+                <p>${percentage > 70 ? '🔥 Pizza fanatic!' : 
+                    percentage > 50 ? '😊 Enjoys pizza' : 
+                    percentage > 30 ? '😐 Take it or leave it' : 
+                    '🚫 Not a pizza fan'}</p>
+            `;
+            
+            document.getElementById('calculation-steps').classList.remove('hidden');
+            resultDiv.classList.remove('hidden');
+        }
+        
+        // Initialize with basic tab
+        showTab('basics');
+    </script>
+</body>
+</html>
