@@ -10,3 +10,4 @@ scikit-learn  # The package name for sklearn
 scipy
 gensim
 pandas
+jupyter-notebook
